@@ -8,6 +8,7 @@ class MainHandler(tornado.web.RequestHandler):
         folder = self.get_argument("folder", "")
         target = os.getcwd() + "/" + folder
         objs = next(os.walk(target))
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.finish({"folders": objs[1],
                     "files": objs[2],
                     "current":folder,
