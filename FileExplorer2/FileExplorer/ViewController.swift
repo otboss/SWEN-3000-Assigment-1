@@ -11,20 +11,14 @@ import Foundation;
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet var fileListing: UITableView!;
-    var homeDirectory:String = "";
-    
-    let alert = UIAlertController(title: "Server IP", message: "Please enter the full server ip address", preferredStyle: UIAlertController.Style.alert);
-    let myUrl = NSURL(string: "");
     var directoryListing = DirectoryListing();
-    var directoryFolders: Array<String> = ["test"];
-    var directoryFiles: Array<String> = ["test2"];
     
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         print("THIS FUNCTION RAN!");
         directoryListing.directoryFolders.sort();
         directoryListing.directoryFiles.sort();
-        directoryFolders.insert("..", at: 0);
+        directoryListing.directoryFolders.insert("..", at: 0);
         var allFolderContents = directoryListing.directoryFolders + directoryListing.directoryFiles;
         let cell: UITableViewCell = UITableViewCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: "cell");
         cell.textLabel?.text = allFolderContents[indexPath.row] as String;
