@@ -8,25 +8,38 @@
 import UIKit;
 import Foundation;
 
-class ViewController: UIViewController {
-
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
     @IBOutlet var fileListing: UITableView!;
     var homeDirectory:String = "";
-    var currentDirectory:String = "";
+    
     let alert = UIAlertController(title: "Server IP", message: "Please enter the full server ip address", preferredStyle: UIAlertController.Style.alert);
     let myUrl = NSURL(string: "");
     var directoryListing = DirectoryListing();
+    var directoryFolders: Array<String> = ["test"];
+    var directoryFiles: Array<String> = ["test2"];
     
     
-    func sendDirectoryRequest(path:String){
-        
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        print("THIS FUNCTION RAN!");
+        directoryListing.directoryFolders.sort();
+        directoryListing.directoryFiles.sort();
+        directoryFolders.insert("..", at: 0);
+        var allFolderContents = directoryListing.directoryFolders + directoryListing.directoryFiles;
+        let cell: UITableViewCell = UITableViewCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: "cell");
+        cell.textLabel?.text = allFolderContents[indexPath.row] as String;
+        return cell;
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil));
-        var request = URLRequest(url: URL(string: "http://127.0.0.1:8000")!);
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        print("ANSWER: ");
+        print(directoryListing.directoryFolders.count + directoryListing.directoryFiles.count + 1);
+        return directoryListing.directoryFolders.count + directoryListing.directoryFiles.count + 1;
+    }
+    
+    func getUrl(url: String){
+        directoryListing.currentPath += url;
+        var request = URLRequest(url: URL(string: directoryListing.currentPath)!);
         request.httpMethod = "GET"
         request.setValue("Application/json", forHTTPHeaderField: "Content-Type");
         let session = URLSession.shared;
@@ -39,41 +52,32 @@ class ViewController: UIViewController {
                     let jsonDecoder = JSONDecoder();
                     let results = try jsonDecoder.decode(ServerResponse.self, from: data);
                     self.directoryListing.directoryFiles = results.files;
-                    self.directoryListing.directoryFolders = results.files;
+                    self.directoryListing.directoryFolders = results.folders;
                     print("THE RESPONSE FROM THE QUERY IS: ");
                     print(results);
-                    
-                    self.fileListing.beginUpdates();
-                    //INSERT ROWS HERE
-                    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-                        
-                    }
-                    self.fileListing.endUpdates();
+                    print("THE DIRECTORY FILES ARE: ");
+                    print(self.directoryListing.directoryFiles);
                 } catch {
                     print(error)
                 }
             }
+            OperationQueue.main.addOperation ({
+                self.fileListing.reloadData();
+            });
         }.resume();
-        
-        self.present(alert, animated: true, completion: nil);
-        /*fileListing.insertRows(at: [IndexPath.init()], with: UITableView.RowAnimation.fade);*/
-        fileListing.beginUpdates();
-        let folderContents:Array<String> = ["hello world", "hello world2"];
-        fileListing.insertRows(at: [IndexPath(row: folderContents.count-1, section: 0)], with: .automatic);
-        fileListing.endUpdates();
-        
+
     }
     
-
-
-    
-    
-    
-    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        getUrl(url: "");
+    }
+        
 }
 
+
 class DirectoryListing {
-    var currentPath:String = "./";
+    var currentPath:String = "http://127.0.0.1:8000/?folder=./";
     var directoryFiles:Array<String> = [];
     var directoryFolders:Array<String> = [];
     func DirectoryListing(){
@@ -85,5 +89,5 @@ struct ServerResponse: Codable {
     var folders:Array<String> = [];
     var files:Array<String> = [];
     var current:String = "./";
-    var parent:String = "./";
+    var parent:String = "";
 }
