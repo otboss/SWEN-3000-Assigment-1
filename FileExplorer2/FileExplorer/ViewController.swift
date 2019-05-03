@@ -18,8 +18,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         print("THIS FUNCTION RAN!");
         directoryListing.directoryFolders.sort();
         directoryListing.directoryFiles.sort();
-        directoryListing.directoryFolders.insert("..", at: 0);
         var allFolderContents = directoryListing.directoryFolders + directoryListing.directoryFiles;
+        allFolderContents.insert("..", at: 0);
         let cell: UITableViewCell = UITableViewCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: "cell");
         cell.textLabel?.text = allFolderContents[indexPath.row] as String;
         return cell;
@@ -68,7 +68,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
         
 }
-
 
 class DirectoryListing {
     var currentPath:String = "http://127.0.0.1:8000/?folder=./";
